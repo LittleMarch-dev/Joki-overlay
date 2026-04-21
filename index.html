@@ -1101,7 +1101,7 @@
           LETS ENJOY THE GAME... SEMOGA BERUNTUNG
         </p>
         <p class="text-xs text-purple-400/40 mt-1 font-raj tracking-widest">
-          REIGAAA PILOTTING SERVICE © 2025
+          REIGAAA PILOTTING SERVICE © <span id="currentYear">2025</span>
         </p>
       </footer>
     </div>
@@ -1183,6 +1183,7 @@
     </div>
 
     <script>
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
       // --- STATE & CONFIG ---
       let data = { antrian: [] };
       let currentTab = "WHIWA";
