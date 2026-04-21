@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   host: 'gateway01.ap-southeast-1.prod.alicloud.tidbcloud.com',
   port: 4000,
   user: '4BnDqAzVHobv5Mp.root',
-  password: process.env.DB_PASSWORD, // Use environment variable
+  password: 'CorqRIhROkr26b7B', // Use environment variable
   database: 'test',
   ssl: { minVersion: 'TLSv1.2', rejectUnauthorized: true }
 });
