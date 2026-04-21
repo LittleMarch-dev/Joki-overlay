@@ -1,0 +1,15 @@
+# 1. Database & Secrets
+# NEVER upload your .env file which will hold your TiDB password
+.env
+.env.local
+
+# 2. Node Dependencies
+# This folder is huge; Netlify will install this automatically for you
+node_modules/
+
+# 3. Build & OS Files
+# Keeps your repo clean from system junk
+.DS_Store
+Thumbs.db
+dist/
+.netlify/

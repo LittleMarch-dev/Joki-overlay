@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overlay - Reigaaa Pilotting</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent !important;
+    overflow: hidden;
+    width: 100vw; height: 100vh;
+  }
+
+  #overlay-container {
+    position: fixed;
+    transition: all 0.3s ease;
+  }
+
+  /* Positions */
+  .pos-bottom-left  { bottom: 20px; left: 20px; }
+  .pos-bottom-right { bottom: 20px; right: 20px; }
+  .pos-top-left     { top: 20px;    left: 20px; }
+  .pos-top-right    { top: 20px;    right: 20px; }
+  .pos-center       { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+  #overlay-text {
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow:
+      -2px -2px 0 #000,
+       2px -2px 0 #000,
+      -2px  2px 0 #000,
+       2px  2px 0 #000,
+       0 0 20px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    letter-spacing: 1px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .size-small  { font-size: 18px; }
+  .size-medium { font-size: 24px; }
+  .size-large  { font-size: 32px; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div id="overlay-container">
+  <span id="overlay-text"></span>
+</div>
+
+<script>
+  const container = document.getElementById('overlay-container');
+  const text      = document.getElementById('overlay-text');
+  
+  // 1. Get Settings from the URL (Popup Generator)
+  const params = new URLSearchParams(window.location.search);
+  const pos    = params.get('pos') || 'bottom-left';
+  const size   = params.get('size') || 'medium';
+
+  container.classList.add('pos-' + pos);
+  text.classList.add('size-' + size);
+
+  const BADGE_MAP = {
+    'VIP': '💎 VIP', 'King': '👑 King', 'Knight': '⚔️ Knight', 'BPJS': '🆓 FREE'
+  };
+
+  let lastId = null;
+
+  async function checkWorking() {
+    try {
+      const response = await fetch('/.netlify/functions/api');
+      const data = await response.json();
+      const item = data.antrian.find(a => a.status === 'dikerjakan');
+
+      if (!item) {
+        container.style.display = 'none';
+        lastId = null;
+        return;
+      }
+
+      const badge = BADGE_MAP[item.memberType] || '🆓 FREE';
+
+      if (lastId !== item.id) {
+        text.style.animation = 'none';
+        text.offsetHeight; 
+        text.style.animation = '';
+        lastId = item.id;
+      }
+
+      text.textContent = `${badge} | ${item.youtubeName} | ${item.layanan}`;
+      container.style.display = 'block';
+
+    } catch (e) {
+      console.error("Sync Error:", e);
+    }
+  }
+
+  setInterval(checkWorking, 5000);
+  checkWorking();
+</script>
+</body>
+</html>
