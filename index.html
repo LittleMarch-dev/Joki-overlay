@@ -742,6 +742,47 @@ function deleteItem(id) {
   }
 }
 
+function copyDiscord() {
+  const discordId = 'moon/lyfe';
+  
+  // Method 1: Modern Clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(discordId).then(() => {
+      showToast('📋 Discord ID Copied!');
+    }).catch(err => {
+      // If modern way fails, try fallback
+      fallbackCopyTextToClipboard(discordId);
+    });
+  } else {
+    // Method 2: Fallback for older browsers or non-secure contexts
+    fallbackCopyTextToClipboard(discordId);
+  }
+}
+
+function fallbackCopyTextToClipboard(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  
+  // Ensure the textarea is off-screen
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  textArea.style.top = "-999999px";
+  document.body.appendChild(textArea);
+  
+  textArea.focus();
+  textArea.select();
+  
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) showToast('📋 Discord ID Copied!');
+  } catch (err) {
+    console.error('Fallback copy failed', err);
+    alert('Copy failed, please manual: ' + text);
+  }
+  
+  document.body.removeChild(textArea);
+}
+
 // --- UI RENDER ---
 function renderQueue() {
   const filtered = data.antrian.filter(a => a.layanan === currentTab);
