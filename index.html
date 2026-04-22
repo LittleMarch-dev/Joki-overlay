@@ -822,6 +822,12 @@
                 <button onclick="copyDiscord()" class="btn-sm btn-check flex-1">
                   📋 Copy Discord
                 </button>
+                <button
+                  onclick="openPanduanModal()"
+                  class="btn-sm btn-primary flex-1"
+                >
+                  👑 Panduan VIP
+                </button>
                 <a
                   href="https://saweria.co/reigaaa"
                   target="_blank"
@@ -1249,6 +1255,94 @@
       </div>
     </div>
 
+    <!-- modal panduan-->
+
+    <div
+      id="panduanModal"
+      class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm p-4"
+    >
+      <div
+        class="bg-gray-900 border border-purple-500/50 rounded-xl w-full max-w-md overflow-hidden shadow-2xl"
+      >
+        <div
+          class="bg-purple-900/30 p-4 border-b border-purple-500/30 flex justify-between items-center"
+        >
+          <h3 class="text-purple-300 font-raj font-bold">
+            👑 PANDUAN OTOMATIS VIP
+          </h3>
+          <button
+            onclick="closePanduanModal()"
+            class="text-gray-400 hover:text-white text-xl"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="p-5 font-sans space-y-4">
+          <p class="text-gray-300 text-xs italic">
+            *Gunakan command di bawah pada pesan Saweria agar antrian masuk
+            otomatis sebagai VIP.
+          </p>
+
+          <div class="space-y-3">
+            <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+              <p class="text-purple-400 text-[10px] uppercase font-bold mb-1">
+                Contoh Pesan Saweria:
+              </p>
+              <code class="text-white text-sm block bg-black/50 p-2 rounded"
+                >!toa !dc reiga_moon Bang joki floor 4</code
+              >
+            </div>
+
+            <div class="text-center text-gray-500">⬇️ HASIL DI TABEL ⬇️</div>
+
+            <div class="overflow-hidden rounded-lg border border-purple-900/50">
+              <table class="w-full text-[10px] text-left bg-gray-900">
+                <thead class="bg-purple-900/50 text-purple-200">
+                  <tr>
+                    <th class="p-2">NAMA SAWERIA</th>
+                    <th class="p-2">LAYANAN</th>
+                    <th class="p-2">DISCORD</th>
+                  </tr>
+                </thead>
+                <tbody class="text-gray-300">
+                  <tr class="border-t border-gray-800">
+                    <td class="p-2 font-bold text-yellow-400">Nama Youtube</td>
+                    <td class="p-2">
+                      <span class="bg-purple-600 px-1 rounded">TOA</span>
+                    </td>
+                    <td class="p-2 text-blue-400">reiga_moon</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <div
+              class="bg-gray-800/50 p-2 rounded border border-gray-700 text-[10px] text-gray-400"
+            >
+              <b class="text-white">Layanan:</b><br />
+              !toa, !whiwa, !matrix, !fotg, !event
+            </div>
+            <div
+              class="bg-gray-800/50 p-2 rounded border border-gray-700 text-[10px] text-gray-400"
+            >
+              <b class="text-white">Discord:</b><br />
+              !dc [nama_discord_kamu]
+            </div>
+          </div>
+
+          <button
+            onclick="closePanduanModal()"
+            class="w-full py-2 mt-4 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-all"
+          >
+            SAYA MENGERTI
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       document.getElementById("currentYear").textContent =
         new Date().getFullYear();
@@ -1292,6 +1386,23 @@
           layanan: selectedLayanan,
         });
       }
+
+      //modal panduan
+      function openPanduanModal() {
+        document.getElementById("panduanModal").classList.remove("hidden");
+      }
+
+      function closePanduanModal() {
+        document.getElementById("panduanModal").classList.add("hidden");
+      }
+
+      // Tambahan: Agar modal tertutup jika mengklik area luar modal
+      window.onclick = function (event) {
+        const modal = document.getElementById("panduanModal");
+        if (event.target == modal) {
+          closePanduanModal();
+        }
+      };
 
       // --- API LAYER (TiDB via Netlify) ---
       async function fetchQueue(showLoader = false) {
@@ -1337,8 +1448,7 @@
               payload.status === "selesai"
                 ? "🎉 Task selesai dikerjakan!"
                 : "🔄 Status: Sedang dikerjakan!";
-          }
-          else if (payload.action === "updateStatusWithLayanan") {
+          } else if (payload.action === "updateStatusWithLayanan") {
             // 👇 INI TAMBAHANNYA 👇
             successMsg = `🚀 VIP Diproses: Layanan diatur ke ${payload.layanan}!`;
             console.log(`${payload.layanan} | ${payload.status}`);
