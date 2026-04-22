@@ -1063,6 +1063,9 @@
                 <button class="tab-btn" onclick="switchTab('EVENT', this)">
                   🎪 EVENT
                 </button>
+                <button onclick="switchTab('SAWERIA', this)" class="tab-btn">
+                  💸 SAWERIA
+                </button>
               </div>
 
               <!-- Table -->
@@ -1200,6 +1203,52 @@
       </div>
     </div>
 
+    <!--modal-->
+    <div
+      id="layananModal"
+      class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm transition-opacity"
+    >
+      <div
+        class="bg-gray-900 border border-purple-500/50 p-6 rounded-xl w-80 shadow-2xl shadow-purple-900/40"
+      >
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-2xl">👑</span>
+          <h3 class="text-purple-300 font-raj font-bold text-lg">
+            Pilih Layanan VIP
+          </h3>
+        </div>
+        <p class="text-gray-400 text-xs mb-5 font-sans">
+          Tentukan layanan untuk bos Saweria ini sebelum dikerjakan:
+        </p>
+
+        <select
+          id="layananSelect"
+          class="w-full bg-gray-800 border border-purple-500/30 text-white text-sm rounded focus:ring-purple-500 focus:border-purple-500 p-2.5 mb-6 outline-none cursor-pointer"
+        >
+          <option value="TOA">🗼 TOA (Tower of Adversity)</option>
+          <option value="WHIWA">🌊 WHIWA (Whimpering Wastes)</option>
+          <option value="MATRIX">🔮 MATRIX (Endstate)</option>
+          <option value="FOTG">⚔️ FOTG</option>
+          <option value="EVENT">🎪 EVENT</option>
+        </select>
+
+        <div class="flex justify-end gap-3">
+          <button
+            onclick="closeLayananModal()"
+            class="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
+          >
+            Batal
+          </button>
+          <button
+            onclick="confirmLayananModal()"
+            class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded transition-all active:scale-95 shadow-lg shadow-purple-500/30"
+          >
+            Kerjakan 🚀
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       document.getElementById("currentYear").textContent =
         new Date().getFullYear();
@@ -1209,6 +1258,40 @@
       let isOwner = false;
       let keySequence = [];
       const OWNER_SEQUENCE = ["o", "w", "n", "e", "r"];
+
+      //SAWERIA
+      let pendingSaweriaId = null;
+      function openLayananModal(id) {
+        pendingSaweriaId = id; // Simpan ID-nya
+        // Munculkan overlay
+        document.getElementById("layananModal").classList.remove("hidden");
+      }
+
+      function closeLayananModal() {
+        pendingSaweriaId = null; // Bersihkan ID
+        // Sembunyikan overlay
+        document.getElementById("layananModal").classList.add("hidden");
+      }
+
+      async function confirmLayananModal() {
+        if (!pendingSaweriaId) return;
+
+        // 1. Ambil nilai layanan yang dipilih dari dropdown
+        const selectedLayanan = document.getElementById("layananSelect").value;
+
+        const idYangAkanDikerjakan = pendingSaweriaId;
+
+        // 2. Tutup modal agar UX terasa instan
+        closeLayananModal();
+
+        // 3. Kirim data ke TiDB lewat api.js
+        await syncAction({
+          action: "updateStatusWithLayanan",
+          id: idYangAkanDikerjakan,
+          status: "dikerjakan",
+          layanan: selectedLayanan,
+        });
+      }
 
       // --- API LAYER (TiDB via Netlify) ---
       async function fetchQueue(showLoader = false) {
@@ -1254,6 +1337,11 @@
               payload.status === "selesai"
                 ? "🎉 Task selesai dikerjakan!"
                 : "🔄 Status: Sedang dikerjakan!";
+          }
+          else if (payload.action === "updateStatusWithLayanan") {
+            // 👇 INI TAMBAHANNYA 👇
+            successMsg = `🚀 VIP Diproses: Layanan diatur ke ${payload.layanan}!`;
+            console.log(`${payload.layanan} | ${payload.status}`);
           }
           showToast(successMsg);
         } catch (e) {
@@ -1553,12 +1641,17 @@
             const globalIndex = start + i + 1;
             const isWorking = item.status === "dikerjakan";
 
+            const workFunction =
+              item.layanan === "SAWERIA"
+                ? `openLayananModal('${item.id}')`
+                : `setWorkingItem('${item.id}')`;
+
             // Kontrol Owner yang lebih bersih
             const controls = isOwner
               ? `
       <td>
         <div class="flex gap-1 justify-end">
-          ${item.status === "menunggu" ? `<button class="btn-sm btn-check" onclick="setWorkingItem('${item.id}')">🔄</button>` : ""}
+          ${item.status === "menunggu" ? `<button class="btn-sm btn-check" onclick="${workFunction}">🔄</button>` : ""}
           ${item.status === "dikerjakan" ? `<button class="btn-sm btn-success" onclick="markDone('${item.id}')">✅</button>` : ""}
           <button class="btn-sm btn-danger" onclick="deleteItem('${item.id}')">✗</button>
         </div>
@@ -1579,9 +1672,15 @@
 
             // 3. Catatan (Satu baris saja di bawah)
             const catatan = item.keterangan
-              ? `<div class="text-[10px] text-gray-500 truncate max-w-[150px] mt-0.5 opacity-60">
-           ${item.keterangan}
-         </div>`
+              ? `<div class="relative group mt-0.5">
+       <div class="text-[10px] text-gray-500 truncate max-w-[150px] opacity-60 cursor-help">
+         ${item.keterangan}
+       </div>
+       
+       <div class="absolute z-50 left-0 top-full mt-1 hidden group-hover:block w-max max-w-[250px] bg-gray-900 text-purple-200 text-[10px] p-2 rounded-md border border-purple-500/50 shadow-xl shadow-purple-900/20 whitespace-normal break-words">
+         ${item.keterangan}
+       </div>
+     </div>`
               : "";
 
             return `

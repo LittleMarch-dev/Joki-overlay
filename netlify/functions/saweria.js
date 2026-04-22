@@ -15,7 +15,7 @@ const pool = mysql.createPool({
 
 // Fungsi pintar untuk membedah pesan dari penonton
 function parseDonationMessage(rawMessage) {
-  let layanan = "Saweria"; // Layanan default jika mereka lupa ketik command
+  let layanan = "SAWERIA"; // Layanan default jika mereka lupa ketik command
   let discord = "-";     // Discord default
   let keterangan = rawMessage || "";
 
