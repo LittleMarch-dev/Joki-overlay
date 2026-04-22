@@ -822,9 +822,9 @@
                 <button onclick="copyDiscord()" class="btn-sm btn-check flex-1">
                   📋 Copy Discord
                 </button>
-                <button
+                <button id="beta-saweria"
                   onclick="openPanduanModal()"
-                  class="btn-sm btn-primary flex-1"
+                  class="btn-sm btn-primary flex-1 hidden"
                 >
                   👑 Panduan VIP
                 </button>
@@ -1257,91 +1257,78 @@
 
     <!-- modal panduan-->
 
-    <div
-      id="panduanModal"
-      class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm p-4"
-    >
-      <div
-        class="bg-gray-900 border border-purple-500/50 rounded-xl w-full max-w-md overflow-hidden shadow-2xl"
-      >
-        <div
-          class="bg-purple-900/30 p-4 border-b border-purple-500/30 flex justify-between items-center"
-        >
-          <h3 class="text-purple-300 font-raj font-bold">
-            👑 PANDUAN OTOMATIS VIP
-          </h3>
-          <button
-            onclick="closePanduanModal()"
-            class="text-gray-400 hover:text-white text-xl"
-          >
-            &times;
-          </button>
-        </div>
+    <div id="panduanModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm p-4">
+  <div class="bg-gray-900 border border-purple-500/50 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
+    
+    <div class="bg-purple-900/30 p-4 border-b border-purple-500/30 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">👑</span>
+        <h3 class="text-purple-300 font-raj font-bold">PANDUAN OTOMATIS VIP</h3>
+      </div>
+      <button onclick="closePanduanModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+    </div>
 
-        <div class="p-5 font-sans space-y-4">
-          <p class="text-gray-300 text-xs italic">
-            *Gunakan command di bawah pada pesan Saweria agar antrian masuk
-            otomatis sebagai VIP.
-          </p>
-
-          <div class="space-y-3">
-            <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-              <p class="text-purple-400 text-[10px] uppercase font-bold mb-1">
-                Contoh Pesan Saweria:
-              </p>
-              <code class="text-white text-sm block bg-black/50 p-2 rounded"
-                >!toa !dc reiga_moon Bang joki floor 4</code
-              >
-            </div>
-
-            <div class="text-center text-gray-500">⬇️ HASIL DI TABEL ⬇️</div>
-
-            <div class="overflow-hidden rounded-lg border border-purple-900/50">
-              <table class="w-full text-[10px] text-left bg-gray-900">
-                <thead class="bg-purple-900/50 text-purple-200">
-                  <tr>
-                    <th class="p-2">NAMA SAWERIA</th>
-                    <th class="p-2">LAYANAN</th>
-                    <th class="p-2">DISCORD</th>
-                  </tr>
-                </thead>
-                <tbody class="text-gray-300">
-                  <tr class="border-t border-gray-800">
-                    <td class="p-2 font-bold text-yellow-400">Nama Youtube</td>
-                    <td class="p-2">
-                      <span class="bg-purple-600 px-1 rounded">TOA</span>
-                    </td>
-                    <td class="p-2 text-blue-400">reiga_moon</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 mt-4">
-            <div
-              class="bg-gray-800/50 p-2 rounded border border-gray-700 text-[10px] text-gray-400"
-            >
-              <b class="text-white">Layanan:</b><br />
-              !toa, !whiwa, !matrix, !fotg, !event
-            </div>
-            <div
-              class="bg-gray-800/50 p-2 rounded border border-gray-700 text-[10px] text-gray-400"
-            >
-              <b class="text-white">Discord:</b><br />
-              !dc [nama_discord_kamu]
-            </div>
-          </div>
-
-          <button
-            onclick="closePanduanModal()"
-            class="w-full py-2 mt-4 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-all"
-          >
-            SAYA MENGERTI
-          </button>
+    <div class="p-5 font-sans space-y-4">
+      
+      <div class="space-y-2">
+        <p class="text-gray-300 text-[11px] font-medium uppercase tracking-wider">Format Pesan Saweria:</p>
+        <div class="bg-black/50 p-3 rounded-lg border border-purple-500/20 group relative">
+          <code class="text-purple-300 text-sm block">!toa !dc reiga_moon Bang joki f4</code>
+          <span class="absolute right-2 top-2 text-[9px] text-gray-500 italic">Contoh</span>
         </div>
       </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-gray-800/50 p-2 rounded border border-gray-700">
+          <p class="text-white text-[10px] font-bold mb-1 underline">List Layanan:</p>
+          <p class="text-gray-400 text-[10px]">!toa, !whiwa, !matrix, !fotg, !event</p>
+        </div>
+        <div class="bg-gray-800/50 p-2 rounded border border-gray-700">
+          <p class="text-white text-[10px] font-bold mb-1 underline">Discord: (Jika Ada)</p>
+          <p class="text-gray-400 text-[10px]">!dc [nama_user_kamu]</p>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-center text-gray-500 text-[10px]">HASIL DI TABEL LIVE</p>
+        <div class="overflow-hidden rounded-lg border border-purple-900/50 shadow-inner">
+          <table class="w-full text-[10px] text-left bg-gray-950">
+            <thead class="bg-purple-900/40 text-purple-200">
+              <tr>
+                <th class="p-2">NAMA</th>
+                <th class="p-2 text-center">LAYANAN</th>
+                <th class="p-2">KETERANGAN</th>
+              </tr>
+            </thead>
+            <tbody class="text-gray-400">
+              <tr class="border-t border-gray-800/50">
+                <td class="p-2 font-bold text-yellow-400">Nama Saweria</td>
+                <td class="p-2 text-center"><span class="bg-purple-600 text-white px-1.5 py-0.5 rounded text-[9px] font-bold">TOA</span></td>
+                <td class="p-2 italic">Bang joki f4...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="bg-yellow-900/20 border border-yellow-700/50 p-3 rounded-lg">
+        <p class="text-yellow-500 text-[10px] leading-relaxed">
+          ⚠️ <b>INFO:</b> Jika pesan tidak mengandung command (seperti !toa), antrianmu akan masuk ke kategori <b>PENDING (SAWERIA)</b> dan admin harus mengeceknya secara manual. Gunakan command agar langsung otomatis masuk antrian!
+        </p>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePanduanModal()" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold rounded-lg transition-all border border-gray-600">
+          TUTUP
+        </button>
+        <a href="https://saweria.co/reigaaa" target="_blank" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg text-center no-underline shadow-lg shadow-purple-900/20 transition-all active:scale-95">
+          GAS SAWERIA 💰
+        </a>
+      </div>
+
     </div>
+  </div>
+</div>
 
     <script>
       document.getElementById("currentYear").textContent =
@@ -1494,6 +1481,7 @@
         document.getElementById("overlayBtn").classList.remove("hidden"); // SHOW SETTING POPUP BUTTON
         document.getElementById("actionHeader").classList.remove("hidden");
         document.getElementById("ownerStats").classList.remove("hidden");
+        document.getElementById("beta-saweria").classList.remove("hidden");
         showToast("⚡ OWNER MODE ACTIVE");
         renderQueue();
       }
