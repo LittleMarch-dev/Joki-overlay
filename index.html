@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>REIGAAA PILOTTING SERVICE — Joki WuWa</title>
-    <link rel="icon" type="image/jpeg" href="icon/favicon.jpg">
+    <link rel="icon" type="image/jpeg" href="icon/favicon.jpg" />
     <link
       href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Noto+Sans:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
       :root {
         --bg-deep: #06030f;
@@ -1042,9 +1043,12 @@
               <!-- Tabs -->
               <div class="flex flex-wrap gap-2 mb-4" id="tabRow">
                 <button
+                  onclick="switchTab('SEMUA', this)"
                   class="tab-btn active"
-                  onclick="switchTab('WHIWA', this)"
                 >
+                  SEMUA
+                </button>
+                <button class="tab-btn" onclick="switchTab('WHIWA', this)">
                   🌊 WHIWA
                 </button>
                 <button class="tab-btn" onclick="switchTab('TOA', this)">
@@ -1063,6 +1067,19 @@
 
               <!-- Table -->
               <div id="tableWrap" style="overflow-x: auto; min-height: 200px">
+                <div class="mb-4 relative">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    oninput="handleSearch()"
+                    placeholder="Cari nama YouTube..."
+                    class="w-full bg-purple-900/20 border border-purple-500/30 rounded-lg px-10 py-2 text-sm text-white placeholder:text-purple-300/30 focus:outline-none focus:border-purple-500 transition-all"
+                  />
+                  <i
+                    data-lucide="search"
+                    class="absolute left-3 top-2.5 w-4 h-4 text-purple-500/50"
+                  ></i>
+                </div>
                 <table class="queue-table" id="queueTable">
                   <thead>
                     <tr>
@@ -1075,6 +1092,7 @@
                   </thead>
                   <tbody id="queueBody"></tbody>
                 </table>
+                <div id="paginationContainer"></div>
                 <div
                   id="emptyState"
                   class="hidden text-center py-10 text-purple-400/50 font-raj tracking-widest text-sm"
@@ -1183,10 +1201,11 @@
     </div>
 
     <script>
-      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      document.getElementById("currentYear").textContent =
+        new Date().getFullYear();
       // --- STATE & CONFIG ---
       let data = { antrian: [] };
-      let currentTab = "WHIWA";
+      let currentTab = "SEMUA";
       let isOwner = false;
       let keySequence = [];
       const OWNER_SEQUENCE = ["o", "w", "n", "e", "r"];
@@ -1262,6 +1281,7 @@
 
       // --- TAB & OWNER LOGIC ---
       function switchTab(tab, btn) {
+        currentPage = 1;
         currentTab = tab;
         document
           .querySelectorAll(".tab-btn")
@@ -1397,6 +1417,50 @@
       }
 
       // --- UI RENDER ---
+      function renderPaginationControls(totalPages) {
+        const container = document.getElementById("paginationContainer");
+        if (totalPages <= 1) {
+          container.innerHTML = "";
+          return;
+        }
+
+        container.innerHTML = `
+    <div class="flex justify-center items-center gap-4 mt-4 pb-6">
+      <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? "disabled" : ""} 
+              class="p-2 border border-purple-500/30 rounded disabled:opacity-30">
+        <i data-lucide="chevron-left" class="w-4 h-4 text-purple-400"></i>
+      </button>
+      <span class="font-orb text-xs text-purple-300">HALAMAN ${currentPage} / ${totalPages}</span>
+      <button onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? "disabled" : ""} 
+              class="p-2 border border-purple-500/30 rounded disabled:opacity-30">
+        <i data-lucide="chevron-right" class="w-4 h-4 text-purple-400"></i>
+      </button>
+    </div>
+  `;
+        lucide.createIcons();
+      }
+
+      function changePage(page) {
+        currentPage = page;
+        renderQueue();
+        // Scroll kembali ke atas tabel agar user tidak bingung
+        document
+          .getElementById("tabRow")
+          .scrollIntoView({ behavior: "smooth" });
+      }
+
+      let searchQuery = ""; // Variabel global baru
+
+      function handleSearch() {
+        searchQuery = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        currentPage = 1; // Reset ke halaman 1 saat mencari
+        renderQueue();
+      }
+
+      let currentPage = 1;
+      const rowsPerPage = 7; // Angka tengah yang aman buat HP & Desktop
       function renderQueue() {
         const tbody = document.getElementById("queueBody");
         const empty = document.getElementById("emptyState");
@@ -1437,42 +1501,110 @@
           : "none";
 
         // 3. FILTER DATA BERDASARKAN TAB
-        const filtered = data.antrian.filter((a) => a.layanan === currentTab);
+        const filtered = data.antrian.filter((a) => {
+          // Filter 1: Berdasarkan Tab
+          const matchTab = currentTab === "SEMUA" || a.layanan === currentTab;
 
+          // Filter 2: Berdasarkan Pencarian Nama (searchQuery harus didefinisikan di global)
+          const matchSearch = a.youtubeName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+
+          return matchTab && matchSearch;
+        });
+
+        // 4. LOGIKA PAGINATION (Gunakan 'filtered' yang sudah jadi di atas)
+        const totalPages = Math.ceil(filtered.length / rowsPerPage);
+
+        // Pastikan currentPage tidak melampaui totalPages (mencegah bug halaman kosong)
+        if (currentPage > totalPages && totalPages > 0) {
+          currentPage = totalPages;
+        }
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedItems = filtered.slice(start, end);
+
+        //5. Cek Kosong
         if (filtered.length === 0) {
-          tbody.innerHTML = "";
-          empty.classList.remove("hidden");
+          // Tampilkan baris "Kosong" di dalam tbody
+          tbody.innerHTML = `
+      <tr>
+        <td colspan="${isOwner ? 5 : 4}" class="py-20 text-center">
+          <div class="flex flex-col items-center justify-center opacity-30">
+            <i data-lucide="inbox" class="w-12 h-12 mb-3"></i>
+            <p class="font-orb text-xs tracking-[0.3em] uppercase">Antrian Kosong</p>
+            ${searchQuery ? `<p class="font-raj text-[10px] mt-1 italic tracking-widest text-purple-400">Tidak ada hasil untuk "${searchQuery}"</p>` : ""}
+          </div>
+        </td>
+      </tr>
+    `;
+
+          // Sembunyikan navigasi pagination karena tidak ada data
+          document.getElementById("paginationContainer").innerHTML = "";
+          if (window.lucide) lucide.createIcons();
           return;
         }
 
-        // 4. RENDER TABLE (Versi Ringkas)
+        // 6. RENDER TABLE (Versi Ringkas)
         empty.classList.add("hidden");
-        tbody.innerHTML = filtered
+        tbody.innerHTML = paginatedItems
           .map((item, i) => {
+            const globalIndex = start + i + 1;
             const isWorking = item.status === "dikerjakan";
 
             // Kontrol Owner yang lebih bersih
             const controls = isOwner
               ? `
       <td>
-        <div class="flex gap-1">
-          ${item.status === "menunggu" ? `<button class="btn-sm btn-check" onclick="setWorkingItem('${item.id}')">🔄 Kerjakan</button>` : ""}
-          ${item.status === "dikerjakan" ? `<button class="btn-sm btn-success" onclick="markDone('${item.id}')">✅ Selesai</button>` : ""}
+        <div class="flex gap-1 justify-end">
+          ${item.status === "menunggu" ? `<button class="btn-sm btn-check" onclick="setWorkingItem('${item.id}')">🔄</button>` : ""}
+          ${item.status === "dikerjakan" ? `<button class="btn-sm btn-success" onclick="markDone('${item.id}')">✅</button>` : ""}
           <button class="btn-sm btn-danger" onclick="deleteItem('${item.id}')">✗</button>
         </div>
       </td>`
               : "";
+            // 1. Label Layanan (Kecil, di samping nama)
+            const labelLayanan =
+              currentTab === "SEMUA"
+                ? `<span class="ml-2 text-[9px] px-1.5 py-0.5 bg-purple-500/20 text-purple-300 rounded border border-purple-500/30 uppercase font-bold">${item.layanan}</span>`
+                : "";
+
+            // 2. Info Discord (Segaris dengan nama jika ada)
+            const discordBadge = item.discord
+              ? `<span class="ml-2 text-[10px] text-indigo-400 flex items-center gap-0.5 opacity-80">
+           <i data-lucide="message-square" class="w-2.5 h-2.5"></i> ${item.discord}
+         </span>`
+              : "";
+
+            // 3. Catatan (Satu baris saja di bawah)
+            const catatan = item.keterangan
+              ? `<div class="text-[10px] text-gray-500 truncate max-w-[150px] mt-0.5 opacity-60">
+           ${item.keterangan}
+         </div>`
+              : "";
 
             return `
-      <tr class="${isWorking ? "working animate-pulse" : ""}">
-        <td class="font-orb text-xs text-purple-400">${i + 1}</td>
-        <td><div class="font-raj font-bold text-sm">${item.youtubeName}</div></td>
-        <td>${memberBadge(item.memberType)}</td>
-        <td>${statusHtml(item.status)}</td>
+      <tr class="${isWorking ? "working animate-pulse bg-purple-500/5" : "border-b border-white/5"}">
+        <td class="font-orb text-[10px] text-purple-400/40 px-2">${i + 1}</td>
+        <td class="py-2 px-2">
+          <div class="flex flex-col justify-center">
+            <div class="flex items-center flex-wrap">
+              <span class="font-raj font-bold text-sm text-white leading-none">${item.youtubeName}</span>
+              ${labelLayanan}
+              ${discordBadge}
+            </div>
+            ${catatan}
+          </div>
+        </td>
+        <td class="px-2">${memberBadge(item.memberType)}</td>
+        <td class="px-2">${statusHtml(item.status)}</td>
         ${controls}
       </tr>`;
           })
           .join("");
+        renderPaginationControls(totalPages);
+        if (typeof lucide !== "undefined") lucide.createIcons();
       }
 
       function memberBadge(type) {
